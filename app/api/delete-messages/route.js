@@ -2,28 +2,43 @@ import { NextResponse } from "next/server";
 import Message from "@/models/Message";
 import connect from "@/db";
 
-export const POST = async (req) => {
+export const DELETE = async (req) => {
   try {
     await connect();
 
-    const { userId } = await req.json();
+    const { messageIds, userId, isSender } = await req.json();
 
-    await Message.updateMany(
-      { sender: userId },
-      { $set: { senderDeleted: true } }
+    if (!Array.isArray(messageIds) || messageIds.length === 0) {
+      return new NextResponse(
+        JSON.stringify({ message: "No message IDs provided" }),
+        { status: 400 }
+      );
+    }
+
+    const updateField = isSender
+      ? { senderDeleted: true }
+      : { receiverDeleted: true };
+
+    const result = await Message.updateMany(
+      { _id: { $in: messageIds }, [isSender ? "sender" : "receiver"]: userId },
+      { $set: updateField }
     );
 
-    await Message.updateMany(
-      { receiver: userId },
-      { $set: { receiverDeleted: true } }
-    );
+    if (result.matchedCount === 0) {
+      return new NextResponse(
+        JSON.stringify({
+          message: "No matching messages found or user not authorized",
+        }),
+        { status: 404 }
+      );
+    }
 
     return new NextResponse(
-      JSON.stringify({ message: "Messages cleared for the user" }),
+      JSON.stringify({ message: "Messages marked as deleted" }),
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error clearing messages:", error);
+    console.error("Error deleting messages:", error);
     return new NextResponse(
       JSON.stringify({ message: "Internal server error" }),
       { status: 500 }

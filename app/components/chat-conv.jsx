@@ -52,11 +52,17 @@ const Chatconv = ({
         );
         if (response.ok) {
           const data = await response.json();
-          setMessages(data);
+          // Filter out messages if the sender has marked them as deleted
+          const filteredMessages = data.filter(
+            (msg) => !(msg.sender._id === user._id && msg.senderDeleted)
+          );
+          setMessages(filteredMessages);
 
-          if (data.length > 0) {
-            const lastMessage = data[data.length - 1];
-            const formattedTimestamp = new Date(lastMessage.timestamp).toLocaleTimeString([], {
+          if (filteredMessages.length > 0) {
+            const lastMessage = filteredMessages[filteredMessages.length - 1];
+            const formattedTimestamp = new Date(
+              lastMessage.timestamp
+            ).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             });
@@ -114,8 +120,7 @@ const Chatconv = ({
             timestamp,
           };
           setMessages((prev) => [...prev, newMessage]);
-          
-        
+
           setLastMessageTime(formattedTimestamp);
 
           socket.emit("send_message", newMessage);
@@ -131,18 +136,24 @@ const Chatconv = ({
 
   const handleDeleteMessages = async () => {
     try {
+      // Collect message IDs to delete
+      const messageIds = messages.map(msg => msg._id);
+
       const response = await fetch("/api/delete-messages", {
-        method: "POST",
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          messageIds,
           userId: user._id,
+          isSender: true,  // true for sender, false for receiver
         }),
       });
 
       if (response.ok) {
-        setIsDropdownOpen(false);
+        setMessages([]);
+        console.log("Messages deleted");
       } else {
         console.error("Failed to delete messages");
       }
@@ -197,11 +208,11 @@ const Chatconv = ({
               </div>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-[5rem]  mr-3 w-48 bg-white border border-gray-300 rounded-lg shadow-lg">
-                  <ul className="py-2 ">
+                <div className="absolute right-0 mt-[5rem] mr-3 w-48 bg-white border border-gray-300 rounded-lg shadow-lg">
+                  <ul className="py-2">
                     <li
                       onClick={handleDeleteMessages}
-                      className="px-4 h-full  hover:text-red-500 duration-100 cursor-pointer"
+                      className="px-4 h-full hover:text-red-500 duration-100 cursor-pointer"
                     >
                       Delete all messages
                     </li>

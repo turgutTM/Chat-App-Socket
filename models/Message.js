@@ -24,11 +24,11 @@ const MessageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    senderDeleted: {
+    senderDeleted: {  
       type: Boolean,
       default: false,
     },
-    receiverDeleted: {
+    receiverDeleted: { 
       type: Boolean,
       default: false,
     },
