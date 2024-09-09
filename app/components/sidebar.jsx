@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { RiNotificationFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { LiaUserFriendsSolid } from "react-icons/lia";
+import { ClipLoader } from "react-spinners"; // Import the spinner
 
 const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
   const router = useRouter();
@@ -15,8 +16,8 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [showFriends, setShowFriends] = useState(false);
   const [friends, setFriends] = useState([]);
-
-  
+  const [loadingRequests, setLoadingRequests] = useState(false); // Loading state for friend requests
+  const [loadingFriends, setLoadingFriends] = useState(false); // Loading state for friends
 
   const handleLogout = async () => {
     try {
@@ -39,6 +40,7 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
   };
 
   const fetchFriendRequests = async () => {
+    setLoadingRequests(true); // Start loading
     try {
       const response = await fetch(`/api/all-friend-requests/${user._id}`);
       if (response.ok) {
@@ -49,10 +51,13 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
       }
     } catch (error) {
       console.error("Error fetching friend requests:", error);
+    } finally {
+      setLoadingRequests(false); // Stop loading
     }
   };
 
   const fetchFriends = async () => {
+    setLoadingFriends(true); // Start loading
     try {
       const response = await fetch(`/api/all-friends/${user._id}`);
       if (response.ok) {
@@ -63,6 +68,8 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
       }
     } catch (error) {
       console.error("Error fetching friends:", error);
+    } finally {
+      setLoadingFriends(false); // Stop loading
     }
   };
 
@@ -209,11 +216,11 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
       {showNotifications && (
         <>
           <div
-            className="fixed  inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setShowNotifications(false)}
           ></div>
 
-          <div className="fixed inset-0  mb-24 flex items-center justify-center z-50">
+          <div className="fixed inset-0 mb-24 flex items-center justify-center z-50">
             <div
               className="bg-white rounded-xl shadow-lg p-6 w-[30rem] max-w-lg"
               onClick={(e) => e.stopPropagation()}
@@ -229,11 +236,15 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
                   &times;
                 </button>
               </div>
-              {friendRequests.length > 0 ? (
+              {loadingRequests ? (
+                <div className="flex justify-center">
+                  <ClipLoader color="#000" size={50} />
+                </div>
+              ) : friendRequests.length > 0 ? (
                 friendRequests.map((request) => (
                   <div
                     key={request._id}
-                    className="flex items-center justify-between   p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out"
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out"
                   >
                     <img
                       src={
@@ -266,9 +277,7 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-black text-lg text-center">
-                  No friend requests
-                </p>
+                <p>No friend requests at the moment.</p>
               )}
             </div>
           </div>
@@ -296,11 +305,15 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
                   &times;
                 </button>
               </div>
-              {friends.length > 0 ? (
+              {loadingFriends ? (
+                <div className="flex justify-center">
+                  <ClipLoader color="#000" size={50} />
+                </div>
+              ) : friends.length > 0 ? (
                 friends.map((friend) => (
                   <div
                     key={friend._id}
-                    className="flex items-center  justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out"
+                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out"
                   >
                     <img
                       src={
@@ -316,7 +329,7 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
                         {friend.name} {friend.surname}
                       </p>
                     </div>
-                    <div>
+                    <div className="flex gap-2">
                       <button
                         className="bg-red-500 text-white text-xs px-4 py-2 rounded-lg hover:bg-red-600 transition duration-150 ease-in-out"
                         onClick={() => handleRemoveFriend(friend._id)}
@@ -327,7 +340,7 @@ const Sidebar = ({ setSelectedComponent, setSelectedProfileId }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-black text-lg text-center">No friends</p>
+                <p>No friends at the moment.</p>
               )}
             </div>
           </div>

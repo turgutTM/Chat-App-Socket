@@ -8,7 +8,7 @@ const Chatprofile = ({
   setSelectedProfileId,
   setSelectedProfileData,
   lastmessagetime,
-  selectedProfileId, 
+  selectedProfileId,
 }) => {
   const [friends, setFriends] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,7 +64,8 @@ const Chatprofile = ({
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="gap-8 flex flex-col">
+
+      <div className="gap-8 flex flex-col overflow-y-auto scrollbar-hide">
         {filteredFriends.length > 0 ? (
           filteredFriends.map((friend) => (
             <div
@@ -86,7 +87,6 @@ const Chatprofile = ({
                     <LiaCheckDoubleSolid className="text-2xl text-blue-600" />
                   )}
                   <p className="text-gray-400 text-sm">
-
                     {selectedProfileId === friend._id ? lastmessagetime : "pm"}
                   </p>
                 </div>
