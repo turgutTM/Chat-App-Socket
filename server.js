@@ -19,14 +19,19 @@ app.prepare().then(() => {
       console.log("User disconnected");
     });
 
-    socket.on("chat message", (msg) => {
-      console.log("Message received:", msg);
-      io.emit("chat message", msg);
-    });
-
     socket.on("send_message", (message) => {
       console.log("Send message event received:", message);
       io.emit("receive_message", message);
+
+      io.emit("receive_message_time", {
+        friendId: message.receiverId,
+        messageTime: message.messageTime,
+      });
+    });
+
+    socket.on("send_message_time", (messageTime) => {
+      console.log("Send message time event received:", messageTime);
+      io.emit("receive_message_time", messageTime);
     });
   });
 

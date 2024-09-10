@@ -6,7 +6,6 @@ export const GET = async (request) => {
   try {
     await connect();
 
-    // Query parametrelerini al
     const url = new URL(request.url);
     const senderId = url.searchParams.get("senderId");
     const receiverId = url.searchParams.get("receiverId");
@@ -18,7 +17,6 @@ export const GET = async (request) => {
       );
     }
 
-    
     const lastMessage = await Message.findOne({
       $or: [
         { sender: senderId, receiver: receiverId },
@@ -26,7 +24,8 @@ export const GET = async (request) => {
       ],
     })
       .sort({ timestamp: -1 })
-      .select("timestamp");
+      .select("timestamp content ")
+      .exec();
 
     if (!lastMessage) {
       return new NextResponse(
@@ -36,7 +35,10 @@ export const GET = async (request) => {
     }
 
     return new NextResponse(
-      JSON.stringify({ lastMessageTime: lastMessage.timestamp }),
+      JSON.stringify({
+        lastMessageTime: lastMessage.timestamp,
+        lastMessageContent: lastMessage.content,
+      }),
       { status: 200 }
     );
   } catch (error) {

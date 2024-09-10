@@ -52,7 +52,6 @@ const Chatconv = ({
         );
         if (response.ok) {
           const data = await response.json();
-          // Filter out messages if the sender has marked them as deleted
           const filteredMessages = data.filter(
             (msg) => !(msg.sender._id === user._id && msg.senderDeleted)
           );
@@ -136,8 +135,7 @@ const Chatconv = ({
 
   const handleDeleteMessages = async () => {
     try {
-      // Collect message IDs to delete
-      const messageIds = messages.map(msg => msg._id);
+      const messageIds = messages.map((msg) => msg._id);
 
       const response = await fetch("/api/delete-messages", {
         method: "DELETE",
@@ -147,7 +145,7 @@ const Chatconv = ({
         body: JSON.stringify({
           messageIds,
           userId: user._id,
-          isSender: true,  // true for sender, false for receiver
+          isSender: true,
         }),
       });
 

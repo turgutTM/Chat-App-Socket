@@ -7,20 +7,48 @@ import { useSelector } from "react-redux";
 const Chatprofile = ({
   setSelectedProfileId,
   setSelectedProfileData,
-  lastmessagetime,
   selectedProfileId,
 }) => {
   const [friends, setFriends] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [lastMessageData, setLastMessageData] = useState({});
   const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
-    const fetchFriends = async () => {
+    const fetchFriendsAndLastMessages = async () => {
       try {
         const response = await fetch(`/api/all-friends/${user._id}`);
         if (response.ok) {
           const data = await response.json();
           setFriends(data.friends || []);
+
+          const lastMessagePromises = data.friends.map(async (friend) => {
+            const lastMessageResponse = await fetch(
+              `/api/last-message-time?senderId=${user._id}&receiverId=${friend._id}`
+            );
+            if (lastMessageResponse.ok) {
+              const lastMessageData = await lastMessageResponse.json();
+              console.log(`Last message data for friend ${friend._id}:`, lastMessageData);
+              return {
+                friendId: friend._id,
+                lastMessageTime: lastMessageData.lastMessageTime,
+                lastMessage: lastMessageData.lastMessageContent,
+              };
+            }
+            return {
+              friendId: friend._id,
+              lastMessageTime: "No messages",
+              lastMessage: "No recent messages",
+            };
+          });
+
+          const lastMessageResults = await Promise.all(lastMessagePromises);
+          const lastMessageMap = {};
+          lastMessageResults.forEach(({ friendId, lastMessageTime, lastMessage }) => {
+            lastMessageMap[friendId] = { lastMessageTime, lastMessage };
+          });
+          console.log("Last message map:", lastMessageMap);
+          setLastMessageData(lastMessageMap);
         } else {
           console.error("Failed to fetch friends");
         }
@@ -29,8 +57,17 @@ const Chatprofile = ({
       }
     };
 
-    fetchFriends();
+    fetchFriendsAndLastMessages();
   }, [user._id]);
+
+  const formatTime = (isoTime) => {
+    if (!isoTime) return "";
+    const date = new Date(isoTime);
+    if (isNaN(date.getTime())) return "";
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
 
   const handleProfileClick = async (profileId) => {
     setSelectedProfileId(profileId);
@@ -87,11 +124,13 @@ const Chatprofile = ({
                     <LiaCheckDoubleSolid className="text-2xl text-blue-600" />
                   )}
                   <p className="text-gray-400 text-sm">
-                    {selectedProfileId === friend._id ? lastmessagetime : "pm"}
+                    {lastMessageData[friend._id]
+                      ? formatTime(lastMessageData[friend._id].lastMessageTime)
+                      : "No messages"}
                   </p>
                 </div>
                 <p className="text-gray-400 w-full whitespace-nowrap overflow-hidden text-ellipsis">
-                  {friend.lastMessage || "No recent messages"}
+                  {lastMessageData[friend._id]?.lastMessage || "No recent messages"}
                 </p>
               </div>
             </div>
