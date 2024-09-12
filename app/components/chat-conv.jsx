@@ -230,11 +230,11 @@ const Chatconv = ({
                     }`}
                   >
                     <div
-                      className={`w-fit p-3 rounded-2xl text-white ${
+                      className={`max-w-[38rem] p-3 rounded-2xl text-white ${
                         msg.sender._id === user._id
                           ? "bg-[#4b4b4b]"
                           : "bg-blue-500"
-                      }`}
+                      } overflow-auto break-words`}
                     >
                       <p>{msg.content}</p>
                       <p className="text-xs text-gray-300 text-right mt-1">

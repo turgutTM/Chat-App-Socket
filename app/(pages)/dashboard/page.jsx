@@ -5,7 +5,7 @@ import Info from "@/app/components/info";
 import Sidebar from "@/app/components/sidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "@/app/features/UserSlice";
-import ClipLoader from "react-spinners/ClipLoader"; 
+import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [selectedProfileId, setSelectedProfileId] = useState("");
   const [selectedProfileData, setSelectedProfileData] = useState(null);
   const dispatch = useDispatch();
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     if (user && user._id) {
@@ -60,12 +60,12 @@ const Dashboard = () => {
     fetchCurrentUser();
   }, [dispatch, router]);
 
-
-  if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-[#1f1e1e]">
-      <ClipLoader color="#ffffff" loading={loading} size={50} />
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#1f1e1e]">
+        <ClipLoader color="#ffffff" loading={loading} size={50} />
+      </div>
+    );
   if (error) return <p className="text-center text-white">{error}</p>;
 
   return (

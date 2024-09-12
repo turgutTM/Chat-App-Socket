@@ -25,10 +25,13 @@ const Chatprofile = ({
           const lastMessagePromises = data.friends.map(async (friend) => {
             const lastMessageResponse = await fetch(
               `/api/last-message-time?senderId=${user._id}&receiverId=${friend._id}`
-            );
+            );  
             if (lastMessageResponse.ok) {
               const lastMessageData = await lastMessageResponse.json();
-              console.log(`Last message data for friend ${friend._id}:`, lastMessageData);
+              console.log(
+                `Last message data for friend ${friend._id}:`,
+                lastMessageData
+              );
               return {
                 friendId: friend._id,
                 lastMessageTime: lastMessageData.lastMessageTime,
@@ -44,9 +47,11 @@ const Chatprofile = ({
 
           const lastMessageResults = await Promise.all(lastMessagePromises);
           const lastMessageMap = {};
-          lastMessageResults.forEach(({ friendId, lastMessageTime, lastMessage }) => {
-            lastMessageMap[friendId] = { lastMessageTime, lastMessage };
-          });
+          lastMessageResults.forEach(
+            ({ friendId, lastMessageTime, lastMessage }) => {
+              lastMessageMap[friendId] = { lastMessageTime, lastMessage };
+            }
+          );
           console.log("Last message map:", lastMessageMap);
           setLastMessageData(lastMessageMap);
         } else {
@@ -130,7 +135,8 @@ const Chatprofile = ({
                   </p>
                 </div>
                 <p className="text-gray-400 w-full whitespace-nowrap overflow-hidden text-ellipsis">
-                  {lastMessageData[friend._id]?.lastMessage || "No recent messages"}
+                  {lastMessageData[friend._id]?.lastMessage ||
+                    "No recent messages"}
                 </p>
               </div>
             </div>
