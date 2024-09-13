@@ -115,14 +115,14 @@ const Chatprofile = ({
               className="flex gap-3 items-center cursor-pointer"
               onClick={() => handleProfileClick(friend._id)}
             >
-              <div className="w-16">
+              <div className="w-14">
                 <img
                   className="w-full rounded-lg"
                   src={friend.profilePhoto || "/profilephoto.jpg"}
                   alt={`${friend.name}'s profile`}
                 />
               </div>
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-[14rem] overflow-auto break-words ">
                 <div className="flex items-center justify-between gap-4">
                   <p className="font-medium">{`${friend.name} ${friend.surname}`}</p>
                   {friend.lastMessageStatus === "read" && (
@@ -134,7 +134,7 @@ const Chatprofile = ({
                       : "No messages"}
                   </p>
                 </div>
-                <p className="text-gray-400 w-full whitespace-nowrap overflow-hidden text-ellipsis">
+                <p className="text-gray-400 w-full  whitespace-nowrap overflow-hidden text-ellipsis">
                   {lastMessageData[friend._id]?.lastMessage ||
                     "No recent messages"}
                 </p>

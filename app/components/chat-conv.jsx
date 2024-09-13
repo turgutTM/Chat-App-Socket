@@ -53,7 +53,7 @@ const Chatconv = ({
         if (response.ok) {
           const data = await response.json();
           const filteredMessages = data.filter(
-            (msg) => !(msg.sender._id === user._id && msg.senderDeleted)
+            (msg) => !(msg.deletedBy && msg.deletedBy.includes(user._id))
           );
           setMessages(filteredMessages);
 
@@ -145,13 +145,12 @@ const Chatconv = ({
         body: JSON.stringify({
           messageIds,
           userId: user._id,
-          isSender: true,
         }),
       });
 
       if (response.ok) {
-        setMessages([]);
-        console.log("Messages deleted");
+        setMessages((prev) => prev.filter((msg) => !messageIds.includes(msg._id)));
+        console.log("Messages marked as deleted");
       } else {
         console.error("Failed to delete messages");
       }
